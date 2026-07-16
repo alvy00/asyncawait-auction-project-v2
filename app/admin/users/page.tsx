@@ -15,7 +15,7 @@ import {
     FaUserPlus,
     FaRegCopy,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 import { User } from "../../../lib/interfaces";
 import { useUser } from "../../../lib/user-context";
 

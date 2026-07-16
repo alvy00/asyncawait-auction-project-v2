@@ -6,10 +6,10 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-} from "../../components/ui/dialog";
+} from "../../../components/ui/dialog";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Auction } from "../../lib/interfaces";
+import { Auction } from "../../../lib/interfaces";
 import Image from "next/image";
 import {
     FaTag,
@@ -25,7 +25,7 @@ import {
     Avatar,
     AvatarFallback,
     AvatarImage,
-} from "../../components/ui/avatar";
+} from "../../../components/ui/avatar";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 

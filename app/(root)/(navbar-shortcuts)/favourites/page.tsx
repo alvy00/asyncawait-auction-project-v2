@@ -9,11 +9,11 @@ import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 import { FaHeartBroken, FaSpinner } from "react-icons/fa";
 import { useAuth } from "../../../../lib/auth-context";
-import AuctionCard from "../../../components/AuctionCard";
-import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
-import AuctionCardDutch from "../../../components/AuctionCardDutch";
-import AuctionCardReverse from "../../../components/AuctionCardReverse";
-import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
+import AuctionCard from "../../../components/auctions-cards/AuctionCard";
+import AuctionCardBlitz from "../../../components/auctions-cards/AuctionCardBlitz";
+import AuctionCardDutch from "../../../components/auctions-cards/AuctionCardDutch";
+import AuctionCardReverse from "../../../components/auctions-cards/AuctionCardReverse";
+import AuctionCardPhantom from "../../../components/auctions-cards/AuctionCardPhantom";
 
 const FavouritesPage = () => {
     const { user } = useUser();

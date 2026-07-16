@@ -3,8 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Countdown } from "./Countdown";
-import { UpcomingAuctionCardProps } from "../../lib/interfaces";
+import { Countdown } from "./../misc/Countdown";
+import { UpcomingAuctionCardProps } from "../../../lib/interfaces";
 import { FaClock, FaUser } from "react-icons/fa";
 
 const FALLBACK_IMAGE = "/fallback.jpg";

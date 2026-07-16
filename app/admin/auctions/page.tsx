@@ -13,7 +13,7 @@ import {
     FaTrash,
     FaRegCopy,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 import { Auction } from "../../../lib/interfaces";
 import AuctionDetailsModal from "../../../app/components/AuctionDetailsModal";
 // Import your client-side Supabase initializer (adjust this path to match your project)

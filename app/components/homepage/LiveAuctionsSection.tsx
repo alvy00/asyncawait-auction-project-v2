@@ -4,14 +4,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import AuctionCard from "./AuctionCard";
-import { Auction } from "../../lib/interfaces";
-import AuctionCardBlitz from "./AuctionCardBlitz";
-import AuctionCardDutch from "./AuctionCardDutch";
-import AuctionCardReverse from "./AuctionCardReverse";
-import AuctionCardPhantom from "./AuctionCardPhantom";
-import { useUser } from "../../lib/user-context";
-import { useAuth } from "../../lib/auth-context";
+import AuctionCard from "../auctions-cards/AuctionCard";
+import { Auction } from "../../../lib/interfaces";
+import AuctionCardBlitz from "../auctions-cards/AuctionCardBlitz";
+import AuctionCardDutch from "../auctions-cards/AuctionCardDutch";
+import AuctionCardReverse from "../auctions-cards/AuctionCardReverse";
+import AuctionCardPhantom from "../auctions-cards/AuctionCardPhantom";
+import { useUser } from "../../../lib/user-context";
+import { useAuth } from "../../../lib/auth-context";
 
 const maxVisibleItems = 3;
 

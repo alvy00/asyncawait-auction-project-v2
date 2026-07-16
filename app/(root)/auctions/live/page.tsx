@@ -2,14 +2,14 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import AuctionCard from "../../../components/AuctionCard";
-import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
-import AuctionCardDutch from "../../../components/AuctionCardDutch";
-import AuctionCardReverse from "../../../components/AuctionCardReverse";
+import AuctionCard from "../../../components/auctions-cards/AuctionCard";
+import AuctionCardBlitz from "../../../components/auctions-cards/AuctionCardBlitz";
+import AuctionCardDutch from "../../../components/auctions-cards/AuctionCardDutch";
+import AuctionCardReverse from "../../../components/auctions-cards/AuctionCardReverse";
 import { Auction } from "../../../../lib/interfaces";
 import { FaSpinner, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
-import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
+import AuctionCardPhantom from "../../../components/auctions-cards/AuctionCardPhantom";
 import { useUser } from "../../../../lib/user-context";
 import { useAuth } from "../../../../lib/auth-context";
 
@@ -280,7 +280,6 @@ const LiveAuctionsPage = () => {
                                         isFavourited={auction.isFavorite}
                                         user={user}
                                         loggedIn={loggedIn}
-                                        token={token}
                                     />
                                 )}
                                 {auction.auction_type === "blitz" && (
@@ -291,7 +290,6 @@ const LiveAuctionsPage = () => {
                                         isFavourited={auction.isFavorite}
                                         user={user}
                                         loggedIn={loggedIn}
-                                        token={token}
                                     />
                                 )}
                                 {auction.auction_type === "dutch" && (
@@ -302,7 +300,6 @@ const LiveAuctionsPage = () => {
                                         isFavourited={auction.isFavorite}
                                         user={user}
                                         loggedIn={loggedIn}
-                                        token={token}
                                     />
                                 )}
                                 {auction.auction_type === "reverse" && (
@@ -313,7 +310,6 @@ const LiveAuctionsPage = () => {
                                         isFavourited={auction.isFavorite}
                                         user={user}
                                         loggedIn={loggedIn}
-                                        token={token}
                                     />
                                 )}
                                 {auction.auction_type === "phantom" && (
@@ -324,7 +320,6 @@ const LiveAuctionsPage = () => {
                                         isFavourited={auction.isFavorite}
                                         user={user}
                                         loggedIn={loggedIn}
-                                        token={token}
                                     />
                                 )}
                             </motion.div>

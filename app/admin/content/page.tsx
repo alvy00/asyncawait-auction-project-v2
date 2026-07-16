@@ -17,7 +17,7 @@ import {
     FaNewspaper,
     FaTag,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 
 // Sample content data
 const SAMPLE_CONTENT = [

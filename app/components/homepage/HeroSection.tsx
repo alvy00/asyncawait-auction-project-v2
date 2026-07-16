@@ -3,16 +3,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Image from "next/image";
-import { Auction } from "../../lib/interfaces";
+import { Auction } from "../../../lib/interfaces";
 import { ChevronLeft, ChevronRight, Clock, Zap } from "lucide-react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
+import { preloadImage } from "@/lib/imageCache";
 
-// ---- Tunable constants ------------------------------------------------
 const AUTOPLAY_INTERVAL_MS = 4500;
 const SPACING_DESKTOP = 200;
 const SPACING_MOBILE = 100;
-const MAX_VISIBLE_DESKTOP = 2; // cards on either side of active
+const MAX_VISIBLE_DESKTOP = 2;
 const MAX_VISIBLE_MOBILE = 1;
 const SPRING_CARD = { type: "spring" as const, stiffness: 220, damping: 35 };
 const SPRING_DOT = { type: "spring" as const, stiffness: 300, damping: 30 };
@@ -276,9 +276,6 @@ function AuctionCardDeck({
     }, [startAnimation, cardCount, isPaused, prefersReducedMotion, handleNext]);
 
     useEffect(() => {
-        // Only respond to arrow keys while the carousel is actually
-        // hovered or focused (isPaused doubles as that signal), so we
-        // don't hijack arrow-key navigation elsewhere on the page.
         if (!isPaused) return;
 
         function onKeyDown(e: KeyboardEvent) {
@@ -288,6 +285,12 @@ function AuctionCardDeck({
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, [isPaused, handlePrev, handleNext]);
+
+    useEffect(() => {
+        auctions.forEach((a) => {
+            if (a.images?.[0]) preloadImage(a.images[0]).catch(() => {});
+        });
+    }, [auctions]);
 
     function getCardProps(idx: number) {
         if (cardCount === 0) {
@@ -342,7 +345,6 @@ function AuctionCardDeck({
 
     function handleCardClick(idx: number, status: string) {
         if (wasDraggingRef.current) {
-            // Swallow the click that follows a drag release.
             wasDraggingRef.current = false;
             return;
         }
@@ -373,8 +375,6 @@ function AuctionCardDeck({
             } else {
                 handlePrev();
             }
-            // Clear the flag on the next tick, after the click event
-            // (fired synchronously on release) has had a chance to check it.
             setTimeout(() => {
                 wasDraggingRef.current = false;
             }, 0);

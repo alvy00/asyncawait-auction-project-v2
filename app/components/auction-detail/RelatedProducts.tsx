@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AuctionCard from "../AuctionCard";
+import AuctionCard from "../auctions-cards/AuctionCard";
 import { Auction } from "@/lib/interfaces";
 import { motion, AnimatePresence } from "framer-motion";
 

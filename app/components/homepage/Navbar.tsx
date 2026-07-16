@@ -4,18 +4,18 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from "../../components/ui/tooltip";
+} from "../../../components/ui/tooltip";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
-} from "../../components/ui/popover";
+} from "../../../components/ui/popover";
 import {
     Menu,
     X,
@@ -44,8 +44,8 @@ import {
 } from "react-icons/md";
 import { FaArrowRightLong } from "react-icons/fa6";
 import toast from "react-hot-toast";
-import { useAuth } from "../../lib/auth-context";
-import { useUser } from "../../lib/user-context";
+import { useAuth } from "../../../lib/auth-context";
+import { useUser } from "../../../lib/user-context";
 
 export const Navbar = () => {
     const { user, isLoading } = useUser();

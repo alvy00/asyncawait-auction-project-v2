@@ -17,7 +17,7 @@ import { motion } from "framer-motion";
 import WinRatioChart from "./_components/WinRatioChart";
 import StatCard from "./_components/StatCard";
 import ActionButton from "./_components/ActionButton";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../components/misc/LoadingSpinner";
 import { useUser } from "../../lib/user-context";
 
 const Dashboard = () => {

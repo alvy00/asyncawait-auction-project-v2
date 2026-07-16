@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BsChatDots } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import { IoMdChatboxes } from "react-icons/io";
-import { useUser } from "./../../lib/user-context";
+import { useUser } from "./../../../lib/user-context";
 
 export default function FloatingChatbot() {
     const { user } = useUser();

@@ -15,7 +15,7 @@ import {
     FaExclamationTriangle,
     FaRegCopy,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 
 interface Bid {
     id: string;

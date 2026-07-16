@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "../components/misc/LoadingSpinner";
 import AdminHeader from "./_components/AdminHeader";
 import StatsOverview from "./_components/StatsOverview";
 import UsersChart from "./_components/UsersChart";

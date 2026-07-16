@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import AuctionCard from "../../../components/AuctionCard";
+import AuctionCard from "../../../components/auctions-cards/AuctionCard";
 import { Auction } from "../../../../lib/interfaces";
 import {
     FaSpinner,
@@ -11,7 +11,7 @@ import {
     FaSortAmountDown,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
-import PastAuctionCard from "../../../components/PastAuctionCard";
+import PastAuctionCard from "../../../components/auctions-cards/PastAuctionCard";
 
 const PastAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -272,12 +272,7 @@ const PastAuctionsPage = () => {
                                     className="hover:scale-105 transform transition-all duration-300 ease-in-out"
                                     variants={itemVariants}
                                 >
-                                    <PastAuctionCard
-                                        auction={auction}
-                                        auctionCreator={
-                                            auction.creator || "Anonymous"
-                                        }
-                                    />
+                                    <PastAuctionCard auction={auction} />
                                 </motion.div>
                             ))}
                         </motion.div>

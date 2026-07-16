@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { Auction } from "../../lib/interfaces";
+import { Auction } from "../../../lib/interfaces";
 import { Countdown } from "./Countdown";
 
 const FALLBACK_IMAGE = "/fallback.jpg";

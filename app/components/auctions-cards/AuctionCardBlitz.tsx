@@ -8,14 +8,14 @@ import {
     FaStar,
     FaStopwatch,
 } from "react-icons/fa";
-import { Auction, AuctionCardProps, User } from "../../lib/interfaces";
+import { Auction, AuctionCardProps, User } from "../../../lib/interfaces";
 import Image from "next/image";
-import { Countdown } from "./Countdown";
+import { Countdown } from "../misc/Countdown";
 import toast from "react-hot-toast";
-import { Button } from "../../components/ui/button";
+import { Button } from "../../../components/ui/button";
 import FavoriteBadge from "./FavouriteBadge";
 import StatusBadge from "./StatusBadge";
-import AuctionDetailsModal from "./AuctionDetailsModal";
+import AuctionDetailsModal from "../auctions-cards/AuctionDetailsModal";
 import {
     cardBase,
     cardImageContainer,
@@ -32,13 +32,13 @@ import {
     cardCreatorBadge,
     cardBidButton,
     getCardAccent,
-} from "./auction-detail/CardStyleSystem";
-import PayNowModal from "./PayNowModal";
+} from "../auction-detail/CardStyleSystem";
+import PayNowModal from "../misc/PayNowModal";
 import { useAuth } from "@/lib/auth-context";
 
 const FIREY_ORANGE = "#FF4500";
 
-const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
+const AuctionCardBlitz: React.FC<AuctionCardProps> = ({
     auction,
     auctionCreator,
     user,
@@ -48,13 +48,15 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
 }) => {
     const { token } = useAuth();
     const controls = useAnimation();
-    const [winner, setWinner] = useState(null);
+    const [winner, setWinner] = useState<string | null>(null);
     const [isEnded, setIsEnded] = useState(false);
+    const [participants, setParticipants] = useState(auction?.participants);
     const [isBidding, setIsBidding] = useState(false);
     const [submittingBid, setSubmittingBid] = useState(false);
-    const [bidAmount, setBidAmount] = useState(auction.starting_price);
+    const [bidAmount, setBidAmount] = useState(
+        auction.highest_bid ? auction.highest_bid + 1 : auction.starting_price,
+    );
     const [highestBid, setHighestBid] = useState(auction.highest_bid);
-    const [totalBids, setTotalBids] = useState(auction.total_bids);
     const [isHovered, setIsHovered] = useState(false);
     const [currentStatus, setCurrentStatus] = useState<
         "upcoming" | "live" | "ended"
@@ -72,8 +74,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
     const imageSrc = auction.images?.[0]?.trim()
         ? auction.images[0]
         : "/fallback.jpg";
-
-    const accent = getCardAccent("phantom");
+    const accent = getCardAccent("blitz");
 
     // sets isEnded
     useEffect(() => {
@@ -81,26 +82,32 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
         setIsEnded(hasEnded);
     }, [auction.end_time]);
 
-    // submit hidden bid using localized serverless layout with mode=phantom parameters
+    // submit bid via serverless route handler (Blitz mode maps to "regular")
     const handleBidSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSubmittingBid(true);
 
         try {
             const formData = new FormData(e.currentTarget);
-            const parsedAmount = Number(formData.get("amount"));
+            const inputAmount = formData.get("amount");
+            const targetBidAmount = inputAmount
+                ? parseFloat(inputAmount.toString())
+                : 0;
 
-            if (user?.money && parsedAmount > user.money) {
+            if (user?.money && targetBidAmount > user.money) {
                 toast.error("Insufficient balance, please deposit more money!");
                 return;
             }
 
             const body = {
                 auction_id: auction.auction_id,
-                amount: parsedAmount,
+                amount: targetBidAmount,
             };
 
-            const res = await fetch("/api/auctions/bid?mode=phantom", {
+            // Serverless query parameters - Blitz uses 'regular' (Highest Bid Ascending) ruleset
+            const auctionMode = "regular";
+
+            const res = await fetch(`/api/auctions/bid?mode=${auctionMode}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -119,11 +126,11 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
             const responseData = await res.json();
             toast.success(
                 responseData.message ||
-                    `Bid of $${bidAmount} placed successfully!`,
+                    `Bid of $${targetBidAmount} placed successfully!`,
             );
 
-            setHighestBid(Number(bidAmount));
-            setTotalBids((prev) => prev + 1);
+            setHighestBid(targetBidAmount);
+            if (user) setWinner(user.name);
             setIsBidding(false);
             setRefresh((prev) => !prev);
         } catch (err) {
@@ -134,7 +141,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
         }
     };
 
-    // get highest bidder from the centralized metadata utility route
+    // get highest bidder via serverless internal POST route
     useEffect(() => {
         const getHighestBidder = async () => {
             const userId = auction?.highest_bidder_id;
@@ -145,16 +152,13 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
             }
 
             try {
-                const res = await fetch(
-                    "/api/auctions/state?action=fetchuser",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ user_id: userId }),
+                const res = await fetch("/api/fetchuser", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
                     },
-                );
+                    body: JSON.stringify({ user_id: userId }),
+                });
 
                 if (!res.ok) {
                     const errorBody = await res.text();
@@ -169,7 +173,6 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
 
                 const data = await res.json();
                 setWinner(data.name);
-                return data;
             } catch (err) {
                 console.error("Fetch exception:", err);
             }
@@ -224,7 +227,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
         }
     }, [shake]);
 
-    // Update logic mapped cleanly to state lifecycle controller parameters
+    // update status via serverless utility route
     const updateStatus = async () => {
         try {
             const res = await fetch("/api/auctions/state?action=updatestatus", {
@@ -251,7 +254,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
         }
     };
 
-    // Wallet deduction via centralized action wrapper parameters
+    // wallet payment via serverless logic
     const handleWalletPayment = async () => {
         try {
             const res = await fetch("/api/auctions/state?action=paywallet", {
@@ -286,7 +289,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
         }
     };
 
-    // SSLCOMMERZ configuration tracking via internal payment micro-router pathing rules
+    // gateway order initiation via serverless payment controller
     const handleSSLCOMMERZPayment = async () => {
         try {
             const res = await fetch("/api/admin/payment", {
@@ -339,17 +342,17 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
             animate={{ opacity: 1, y: 0 }}
             whileHover={{
                 scale: 1.02,
-                boxShadow: "0 0 8px 2px rgba(255, 215, 0, 0.5)",
+                boxShadow: "0 0 8px 2px rgba(255, 85, 0, 0.5)",
             }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className={`${cardBase} relative rounded-2xl bg-[rgba(80, 65, 10, 0.3)] backdrop-blur-md border border-yellow-600 shadow-lg bg-gradient-to-br from-[#5a4a00]/40 via-[#7c6800]/30 to-[#5a4a00]/40 text-white`}
+            className={`${cardBase} relative rounded-2xl bg-[rgba(30,10,5,0.3)] backdrop-blur-md border border-orange-700 shadow-lg bg-gradient-to-br from-[#3a0c00]/40 via-[#5b1900]/25 to-[#3a0c00]/40 text-white`}
         >
             {/* Image container */}
             <div
                 className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden`}
             >
                 <div
-                    className={`${cardImageContainer} group cursor-pointer overflow-hidden rounded-t-2xl relative`}
+                    className={`${cardImageContainer} cursor-pointer rounded-t-2xl overflow-hidden group relative`}
                 >
                     <Image
                         src={imageSrc}
@@ -360,13 +363,12 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
                         onClick={() => setDetailsOpen(true)}
                     />
                 </div>
-                <div className={`${cardOverlay} bg-black/20`} />
                 <div className={cardStatusBadge}>
                     <StatusBadge
-                        type="phantom"
+                        type="blitz"
                         status={currentStatus}
                         auctionId={auction.auction_id}
-                        participantCount={auction.participants}
+                        participantCount={participants}
                     />
                 </div>
                 <div className={cardFavoriteBadge}>
@@ -380,35 +382,37 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
             </div>
 
             {/* Content area */}
-            <div className={cardContent}>
+            <div className={`${cardContent}`}>
                 <div onClick={() => setDetailsOpen(true)}>
                     <h3
-                        className={`${cardTitle} text-emerald-300 cursor-pointer`}
+                        className={`${cardTitle} text-orange-300 cursor-pointer`}
                     >
                         #{auction.item_name}
                     </h3>
                     <div
-                        className={`${cardLabel} flex items-center gap-1 text-yellow-300`}
+                        className={`${cardLabel} flex items-center gap-1 text-orange-300`}
                     >
-                        <span className="flex items-center gap-1">
-                            <FaBullhorn className="text-yellow-400" />
-                            Bidding starts at:
-                        </span>
+                        {!highestBid ? (
+                            <>
+                                <FaBullhorn className="text-yellow-400" />
+                                Start the Bidding war at:
+                            </>
+                        ) : (
+                            <>Current Highest bid:</>
+                        )}
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <div
-                            className={`${cardPrice} inline-block text-white text-lg font-bold px-3 py-1 rounded shadow-inner ring-1 ring-yellow-500/20`}
-                        >
-                            ${auction.starting_price.toFixed(2)}
-                        </div>
-                        <div className="mt-1 text-xs font-semibold tracking-wide transition-all duration-300 ease-in-out text-yellow-400">
-                            {totalBids ? `(${totalBids} Bids Already!!)` : ""}
-                        </div>
+                    <div
+                        className={`${cardPrice} inline-block text-white text-lg font-bold px-3 py-1 rounded shadow-inner ring-1 ring-red-500/20`}
+                    >
+                        {highestBid
+                            ? `$${highestBid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                            : `$${auction.starting_price.toFixed(2)}`}
                     </div>
 
                     <div
-                        className={`${cardFooter} flex items-center justify-between text-yellow-300`}
+                        className={
+                            cardFooter + " flex items-center justify-between"
+                        }
                     >
                         <div className={cardCountdown}>
                             <Countdown
@@ -417,7 +421,7 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
                             />
                         </div>
                         <div
-                            className={`${cardCreatorBadge} font-semibold flex items-center`}
+                            className={`${cardCreatorBadge} text-orange-400 font-semibold flex items-center`}
                         >
                             {auctionCreator}
                         </div>
@@ -475,15 +479,13 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
                                                     "upcoming"
                                                 }
                                                 className={`
-                      w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600
-                      text-white font-bold shadow-lg
-                      transition duration-300
-                      ${
-                          auction.status === "upcoming"
-                              ? "cursor-not-allowed bg-yellow-400 border-yellow-400 hover:from-yellow-400 hover:to-yellow-400 hover:border-yellow-400"
-                              : "cursor-pointer hover:from-yellow-600 hover:to-yellow-800 hover:border-yellow-500"
-                      }
-                    `}
+                          w-full py-2 px-4 rounded-full
+                          bg-gradient-to-r from-orange-600 to-orange-800
+                          border border-orange-700 text-white font-bold shadow-lg
+                          hover:from-orange-700 hover:to-orange-900 hover:border-orange-600
+                          transition duration-300
+                          cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+                        `}
                                             >
                                                 {auction.status === "upcoming"
                                                     ? "Coming Soon"
@@ -494,27 +496,20 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
                                                 onClick={() =>
                                                     setShowPayNowModal(true)
                                                 }
-                                                whileHover={{
-                                                    scale: 1.02,
-                                                    filter: "brightness(1.1)",
-                                                }}
-                                                whileTap={{ scale: 0.95 }}
-                                                transition={{
-                                                    type: "spring",
-                                                    stiffness: 260,
-                                                    damping: 15,
-                                                }}
                                                 className={`
-                      w-full py-2 px-4 rounded-full bg-gradient-to-r from-yellow-500 to-yellow-700 border border-yellow-600
-                      text-white font-bold shadow-lg
-                      transition duration-300 cursor-pointer
-                    `}
+                          w-full py-2 px-4 rounded-full
+                          bg-gradient-to-r from-orange-600 to-orange-800
+                          border border-orange-700 text-white font-bold shadow-lg
+                          hover:from-orange-700 hover:to-orange-900 hover:border-orange-600
+                          transition duration-300
+                          cursor-pointer disabled:cursor-not-allowed disabled:opacity-50
+                        `}
                                             >
                                                 Pay Now
                                             </motion.button>
                                         )
                                     ) : (
-                                        <div className="w-full py-2 px-4 font-semibold text-white border border-gray-500 bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm flex items-center justify-center rounded-full">
+                                        <div className="w-full py-2 px-4 font-semibold rounded-full text-white border border-gray-500 shadow-md flex items-center justify-center bg-gray-800 text-gray-300 font-medium cursor-not-allowed shadow-inner text-xs md:text-sm">
                                             You created this auction
                                         </div>
                                     )}
@@ -537,14 +532,18 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
                                         onChange={(e) =>
                                             setBidAmount(Number(e.target.value))
                                         }
-                                        min={auction.starting_price}
+                                        min={
+                                            highestBid
+                                                ? highestBid + 1
+                                                : auction.starting_price
+                                        }
                                         placeholder="Your bid"
-                                        className="w-2/3 max-w-[100px] p-2 rounded-lg border border-yellow-600 bg-[rgba(255,215,0,0.2)] text-white placeholder-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition"
+                                        className="w-2/3 max-w-[100px] p-2 rounded-lg border border-orange-700 bg-[rgba(255, 69, 0, 0.15)] text-white placeholder-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                                     />
                                     <button
                                         type="submit"
                                         disabled={submittingBid}
-                                        className={`px-3 py-2 bg-yellow-600 text-white font-semibold rounded-lg border border-yellow-500 shadow hover:bg-yellow-500 hover:border-yellow-400 transition-all duration-300 ease-in-out cursor-pointer ${
+                                        className={`px-3 py-2 bg-orange-700 text-white font-semibold rounded-lg border border-orange-600 shadow hover:bg-orange-600 hover:border-orange-500 transition-all duration-300 ease-in-out cursor-pointer ${
                                             submittingBid
                                                 ? "opacity-50 cursor-not-allowed"
                                                 : ""
@@ -593,18 +592,18 @@ const AuctionCardPhantom: React.FC<AuctionCardProps> = ({
 
             {/* Shake animation styles */}
             <style>{`
-      @keyframes gentle-shake {
-        0%, 100% { transform: translateX(0); }
-        30% { transform: translateX(-0.3px); }
-        50% { transform: translateX(0.3px); }
-        70% { transform: translateX(-0.2px); }
-      }
-      .animate-shake {
-        animation: gentle-shake 0.4s ease-in-out;
-      }
-    `}</style>
+        @keyframes gentle-shake {
+          0%, 100% { transform: translateX(0); }
+          30% { transform: translateX(-0.3px); }
+          50% { transform: translateX(0.3px); }
+          70% { transform: translateX(-0.2px); }
+        }
+        .animate-shake {
+          animation: gentle-shake 0.4s ease-in-out;
+        }
+      `}</style>
         </motion.div>
     );
 };
 
-export default AuctionCardPhantom;
+export default AuctionCardBlitz;

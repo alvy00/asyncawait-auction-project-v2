@@ -4,11 +4,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useUser } from "../../../../lib/user-context";
 import { useAuth } from "../../../../lib/auth-context";
 import { Auction } from "../../../../lib/interfaces";
-import AuctionCard from "../../../components/AuctionCard";
-import AuctionCardBlitz from "../../../components/AuctionCardBlitz";
-import AuctionCardDutch from "../../../components/AuctionCardDutch";
-import AuctionCardReverse from "../../../components/AuctionCardReverse";
-import AuctionCardPhantom from "../../../components/AuctionCardPhantom";
+import AuctionCard from "../../../components/auctions-cards/AuctionCard";
+import AuctionCardBlitz from "../../../components/auctions-cards/AuctionCardBlitz";
+import AuctionCardDutch from "../../../components/auctions-cards/AuctionCardDutch";
+import AuctionCardReverse from "../../../components/auctions-cards/AuctionCardReverse";
+import AuctionCardPhantom from "../../../components/auctions-cards/AuctionCardPhantom";
 import { motion } from "framer-motion";
 import { FaSpinner, FaExclamationTriangle } from "react-icons/fa";
 

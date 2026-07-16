@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { Auction } from "../../../lib/interfaces";
 import { FaEdit, FaTrash, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Button } from "../../../components/ui/button";
-import { Countdown } from "../../components/Countdown";
+import { Countdown } from "../../components/misc/Countdown";
 import { FaBolt, FaClock, FaFlagCheckered } from "react-icons/fa";
 import { useUser } from "../../../lib/user-context";
 

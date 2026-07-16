@@ -13,7 +13,7 @@ import {
     FaExclamationTriangle,
     FaMoneyBill,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 
 // Sample transactions data
 const SAMPLE_TRANSACTIONS = [

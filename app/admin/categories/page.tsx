@@ -13,7 +13,7 @@ import {
     FaFolder,
     FaFolderOpen,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 
 // Sample categories data
 const SAMPLE_CATEGORIES = [

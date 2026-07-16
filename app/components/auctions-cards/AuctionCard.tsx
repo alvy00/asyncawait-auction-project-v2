@@ -1,32 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Button } from "../../components/ui/button";
-import Image from "next/image";
-import toast from "react-hot-toast";
-import { Auction, AuctionCardProps, User } from "../../lib/interfaces";
+import { useAuth } from "@/lib/auth-context";
 import { motion } from "framer-motion";
-import { Countdown } from "./Countdown";
-import AuctionDetailsModal from "./AuctionDetailsModal";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FaBullhorn, FaGavel } from "react-icons/fa";
-import FavoriteBadge from "./FavouriteBadge";
-import StatusBadge from "./StatusBadge";
+import { Button } from "../../../components/ui/button";
+import { AuctionCardProps } from "../../../lib/interfaces";
 import {
     cardBase,
-    cardImageContainer,
-    cardImage,
-    cardStatusBadge,
-    cardFavoriteBadge,
     cardContent,
-    cardTitle,
+    cardCountdown,
+    cardFavoriteBadge,
+    cardFooter,
+    cardImage,
+    cardImageContainer,
     cardLabel,
     cardPrice,
-    cardFooter,
-    cardCountdown,
-} from "./auction-detail/CardStyleSystem";
-import PayNowModal from "./PayNowModal";
-import { useAuth } from "@/lib/auth-context";
+    cardStatusBadge,
+    cardTitle,
+} from "../auction-detail/CardStyleSystem";
+import AuctionDetailsModal from "../auctions-cards/AuctionDetailsModal";
+import { Countdown } from "../misc/Countdown";
+import PayNowModal from "../misc/PayNowModal";
+import FavoriteBadge from "./FavouriteBadge";
+import StatusBadge from "./StatusBadge";
 
 const FALLBACK_IMAGE = "/fallback.jpg";
 
@@ -297,25 +297,32 @@ const AuctionCard: React.FC<AuctionCardProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{
-                scale: 1.02,
-                boxShadow: "0 0 8px 2px rgba(0, 255, 170, 0.5)",
+                y: -5,
+                boxShadow:
+                    "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(52, 211, 153, 0.4)",
             }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
-            className={`${cardBase} bg-gradient-to-br from-emerald-900/40 to-emerald-800/20 backdrop-blur-xl border-2 border-green-300 rounded-2xl shadow-inner shadow-emerald-900/20 transition-all duration-300 ${shake ? "animate-shake" : ""}`}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={`${cardBase} bg-linear-to-br from-blue-500 to-red-700 backdrop-blur-xl border-2 border-green-300 rounded-2xl shadow-inner shadow-emerald-900/20 ${shake ? "animate-shake" : ""}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
         >
             {/* Image Container */}
-            <div className={cardImageContainer}>
-                <div className="relative w-full h-full overflow-hidden group rounded-t-2xl cursor-pointer">
+            <div
+                className={`${cardImageContainer} overflow-hidden rounded-t-2xl`}
+            >
+                <motion.div
+                    animate={{ scale: isHovered ? 1.05 : 1 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="relative w-full h-full cursor-pointer"
+                    onClick={() => setDetailsOpen(true)}
+                >
                     <Image
                         src={imageSrc}
                         alt={auction.item_name}
                         fill
-                        onClick={() => setDetailsOpen(true)}
-                        className={`${cardImage} object-cover transform transition-transform duration-500 group-hover:scale-105`}
+                        className={`${cardImage} object-cover`}
                     />
-                </div>
+                </motion.div>
                 <div className={cardStatusBadge}>
                     <StatusBadge
                         type="classic"

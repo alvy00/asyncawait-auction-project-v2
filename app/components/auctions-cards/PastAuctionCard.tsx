@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { PastAuctionCardProps } from "../../lib/interfaces";
+import { PastAuctionCardProps } from "../../../lib/interfaces";
 
 const PastAuctionCard: React.FC<PastAuctionCardProps> = ({ auction }) => {
     const firstImage = auction.images?.[0] || "/fallback.jpg";

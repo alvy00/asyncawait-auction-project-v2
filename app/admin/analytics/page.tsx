@@ -27,7 +27,7 @@ import {
     FaFilter,
     FaSearch,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 
 // Register ChartJS components
 ChartJS.register(

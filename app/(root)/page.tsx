@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import dynamic from "next/dynamic";
 
 // Keep critical components imported normally for instant LCP (Largest Contentful Paint)
-import { HeroSection } from "../components/HeroSection";
-import LiveAuctionsSection from "../components/LiveAuctionsSection";
+import { HeroSection } from "../components/homepage/HeroSection";
+import LiveAuctionsSection from "../components/homepage/LiveAuctionsSection";
 
 const AuctionTypesSection = dynamic(() =>
     import("../components/auction-types/AuctionTypesSection").then(
@@ -13,17 +13,17 @@ const AuctionTypesSection = dynamic(() =>
     ),
 );
 const WhyChooseUsSection = dynamic(
-    () => import("@/app/components/WhyChooseUsSection"),
+    () => import("@/app/components/homepage/WhyChooseUsSection"),
 );
 const MarketingShowcase = dynamic(
-    () => import("../components/MarketingShowcase"),
+    () => import("../components/homepage/MarketingShowcase"),
 );
 //const CategorySection = dynamic(() => import("../components/CategorySection"));
 const TestimonialsSection = dynamic(
-    () => import("../components/TestimonialsSection"),
+    () => import("../components/homepage/TestimonialsSection"),
 );
 const NewsletterSection = dynamic(
-    () => import("../components/NewsletterSection"),
+    () => import("../components/homepage/NewsletterSection"),
 );
 
 export default function Home() {

@@ -9,7 +9,7 @@ import {
     FaCommentAlt,
     FaExclamationCircle,
 } from "react-icons/fa";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import LoadingSpinner from "../../components/misc/LoadingSpinner";
 import toast from "react-hot-toast";
 
 // Sample feedback data

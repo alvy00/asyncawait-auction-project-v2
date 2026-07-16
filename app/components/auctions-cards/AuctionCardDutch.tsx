@@ -10,12 +10,12 @@ import {
 } from "react-icons/fa";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { Button } from "../../components/ui/button";
-import { Auction, AuctionCardProps, User } from "../../lib/interfaces";
-import { Countdown } from "./Countdown";
+import { Button } from "../../../components/ui/button";
+import { Auction, AuctionCardProps, User } from "../../../lib/interfaces";
+import { Countdown } from "../misc/Countdown";
 import StatusBadge from "./StatusBadge";
 import FavoriteBadge from "./FavouriteBadge";
-import AuctionDetailsModal from "./AuctionDetailsModal";
+import AuctionDetailsModal from "../auctions-cards/AuctionDetailsModal";
 import {
     cardBase,
     cardImageContainer,
@@ -32,8 +32,8 @@ import {
     cardCreatorBadge,
     cardBidButton,
     getCardAccent,
-} from "./auction-detail/CardStyleSystem";
-import PayNowModal from "./PayNowModal";
+} from "../auction-detail/CardStyleSystem";
+import PayNowModal from "../misc/PayNowModal";
 import { useAuth } from "@/lib/auth-context";
 
 const AuctionCardDutch: React.FC<AuctionCardProps> = ({

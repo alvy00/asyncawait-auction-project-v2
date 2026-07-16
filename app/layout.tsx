@@ -7,11 +7,13 @@ import { AuthProvider } from "../lib/auth-context";
 import { UserProvider } from "../lib/user-context";
 import SupabaseProvider from "../lib/supabaseProvider";
 import { Analytics } from "@vercel/analytics/next";
-import { ChatbotWrapper } from "./components/ChatbotWrapper";
+import { ChatbotWrapper } from "./components/chatbot/ChatbotWrapper";
 
 // Lazy load non-critical components to reduce initial bundle size
 const AnimatedBackground = dynamic(() =>
-    import("./components/AnimatedBackground").then((m) => m.AnimatedBackground),
+    import("./components/misc/AnimatedBackground").then(
+        (m) => m.AnimatedBackground,
+    ),
 );
 
 const playfair = Playfair_Display({

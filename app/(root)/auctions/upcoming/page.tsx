@@ -10,7 +10,7 @@ import {
     FaCalendarAlt,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
-import UpcomingAuctionCard from "../../../components/UpcomingAuctionCard";
+import UpcomingAuctionCard from "../../../components/auctions-cards/UpcomingAuctionCard";
 
 const UpcomingAuctionsPage = () => {
     const [auctions, setAuctions] = useState<Auction[]>([]);
