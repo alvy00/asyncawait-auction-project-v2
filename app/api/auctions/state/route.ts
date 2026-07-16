@@ -139,6 +139,32 @@ export async function POST(request: Request) {
             );
         }
 
+        // --- ACTION C: FETCH USER NAME ---
+        if (action === "fetchuser") {
+            const { user_id } = await request.json();
+
+            if (!user_id) {
+                return NextResponse.json(
+                    { message: "Missing user_id" },
+                    { status: 400 },
+                );
+            }
+
+            const { data: user, error } = await supabase
+                .from("users")
+                .select("name")
+                .eq("user_id", user_id)
+                .single();
+
+            if (error || !user) {
+                return NextResponse.json(
+                    { message: "User not found" },
+                    { status: 404 },
+                );
+            }
+
+            return NextResponse.json(user, { status: 200 });
+        }
         return NextResponse.json(
             { message: "Invalid action specifier query" },
             { status: 400 },

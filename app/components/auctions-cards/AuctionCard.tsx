@@ -297,12 +297,12 @@ const AuctionCard: React.FC<AuctionCardProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{
-                y: -5,
+                y: -8,
                 boxShadow:
-                    "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 0 12px 2px rgba(52, 211, 153, 0.4)",
+                    "0 25px 30px -5px rgba(0, 0, 0, 0.4), 0 0 20px 2px rgba(52, 211, 153, 0.5)",
             }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className={`${cardBase} bg-linear-to-br from-blue-500 to-red-700 backdrop-blur-xl border-2 border-green-300 rounded-2xl shadow-inner shadow-emerald-900/20 ${shake ? "animate-shake" : ""}`}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }} // Faster, more responsive
+            className={`${cardBase} bg-linear-to-br from-emerald-900/40 to-emerald-800/20 backdrop-blur-xl border-2 border-green-300 rounded-2xl shadow-inner shadow-emerald-900/20 ${shake ? "animate-shake" : ""}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
         >
@@ -311,8 +311,8 @@ const AuctionCard: React.FC<AuctionCardProps> = ({
                 className={`${cardImageContainer} overflow-hidden rounded-t-2xl`}
             >
                 <motion.div
-                    animate={{ scale: isHovered ? 1.05 : 1 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    animate={{ scale: isHovered ? 1.08 : 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     className="relative w-full h-full cursor-pointer"
                     onClick={() => setDetailsOpen(true)}
                 >
