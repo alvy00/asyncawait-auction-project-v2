@@ -1,0 +1,447 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { useAuth } from "@/lib/auth-context";
+import {
+    FaEnvelope,
+    FaFacebookF,
+    FaGoogle,
+    FaLock,
+    FaEye,
+    FaEyeSlash,
+} from "react-icons/fa";
+import { motion } from "framer-motion";
+import { createBrowserClient } from "@supabase/ssr";
+
+export default function LoginPage() {
+    const { loggedIn, user, isReady } = useAuth();
+    const router = useRouter();
+
+    const [supabase] = useState(() =>
+        createBrowserClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        ),
+    );
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const [checkingAuth, setCheckingAuth] = useState(true);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    // 1. Unified Google OAuth Handler
+    const handleGoogleLogin = async () => {
+        const redirectTo = `${window.location.origin}/auth/callback`;
+
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo,
+                queryParams: {
+                    access_type: "offline",
+                    prompt: "select_account",
+                },
+            },
+        });
+
+        if (error) {
+            console.error("Google OAuth error:", error.message);
+            toast.error("Failed to start Google login: " + error.message);
+        }
+    };
+
+    // 2. Serverless Facebook OAuth Handler
+    const handleFacebookLogin = async () => {
+        const redirectTo = `${window.location.origin}/auth/callback`;
+
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: "facebook",
+            options: {
+                redirectTo,
+                queryParams: {
+                    access_type: "offline",
+                },
+            },
+        });
+
+        if (error) {
+            console.error("Facebook OAuth error:", error.message);
+            toast.error("Failed to start Facebook login: " + error.message);
+        }
+    };
+
+    // 3. Automated Session State & Auth Event Listeners
+    useEffect(() => {
+        async function checkCurrentSession() {
+            try {
+                const {
+                    data: { session },
+                    error,
+                } = await supabase.auth.getSession();
+
+                if (error || !session) {
+                    setCheckingAuth(false);
+                    return;
+                }
+
+                router.push("/");
+            } catch (err) {
+                console.error("Session evaluation failed:", err);
+                setCheckingAuth(false);
+            }
+        }
+
+        checkCurrentSession();
+
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === "SIGNED_OUT") {
+                setShowLogoutModal(true);
+                router.refresh();
+            } else if (event === "SIGNED_IN" && session) {
+                router.push("/");
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [router, supabase.auth]);
+
+    // Redirect if custom React context updates before layout mounted
+    useEffect(() => {
+        if (isReady && loggedIn && user) {
+            router.push("/");
+        }
+    }, [isReady, loggedIn, user, router]);
+
+    // Prefetching for dashboard experience
+    useEffect(() => {
+        router.prefetch("/auctions/all");
+        router.prefetch("/auctions/upcoming");
+        router.prefetch("/auctions/past");
+    }, [router]);
+
+    useEffect(() => {
+        if (showLogoutModal) {
+            const timeout = setTimeout(() => setShowLogoutModal(false), 8000);
+            return () => clearTimeout(timeout);
+        }
+    }, [showLogoutModal]);
+
+    // 4. Serverless API Integrated Email/Password Authentication
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        try {
+            const formData = new FormData(e.currentTarget);
+            const email = formData.get("email")?.toString().trim() || "";
+            const password = formData.get("password")?.toString() || "";
+
+            if (!email || !password) {
+                toast.error("Please fill in all required fields.");
+                setIsLoading(false);
+                return;
+            }
+
+            // 🚀 Replaced client SDK execution with your serverless Route handler
+            const response = await fetch("/api/auth", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    action: "login",
+                    email,
+                    password,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Invalid credentials.");
+            }
+
+            // Sync backend tokens down to your client context layers
+            if (result.token) {
+                // Read from your api handler's refresh token structure if passed down,
+                // or let standard session recovery parse the new secure server cookie.
+                await supabase.auth.initialize();
+            }
+
+            toast.success(result.message || "Logged In!");
+
+            // Refresh routing layout and navigate to home base
+            router.refresh();
+            router.push("/");
+        } catch (err: any) {
+            console.error("Login failed:", err);
+            const message =
+                err?.message || "Login failed. Please verify your credentials.";
+            toast.error(message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (!isReady || checkingAuth) return null;
+
+    return (
+        <>
+            {/* Animated Background */}
+            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-gradient-to-br from-orange-500 via-purple-600 to-blue-500 rounded-full filter blur-[120px] opacity-40 animate-pulse-slow" />
+                <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-gradient-to-tr from-blue-500 via-orange-400 to-purple-500 rounded-full filter blur-[100px] opacity-30 animate-float" />
+            </div>
+
+            {/* Login Form */}
+            <div className="min-h-screen flex items-center justify-center px-4 py-12 relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    className="w-full max-w-md bg-[#10182A]/90 backdrop-blur-xl p-8 sm:p-10 rounded-2xl shadow-2xl border border-white/10 flex flex-col items-center"
+                >
+                    <Link href="/" className="mb-8 block">
+                        <Image
+                            src="/logo-white.png"
+                            alt="AuctaSync Logo"
+                            width={180}
+                            height={45}
+                            priority
+                        />
+                    </Link>
+
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2 font-serif text-center">
+                        Sign in to your account
+                    </h1>
+
+                    <p className="text-gray-400 mb-8 text-center">
+                        Access exclusive auctions, track your bids, and more.
+                    </p>
+
+                    <form onSubmit={handleSubmit} className="w-full space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-gray-300">
+                                Email
+                            </Label>
+                            <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2">
+                                <FaEnvelope className="text-orange-400 mr-3" />
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="name@example.com"
+                                    required
+                                    autoFocus
+                                    className="w-full bg-transparent border-0 text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                <Label
+                                    htmlFor="password"
+                                    className="text-gray-300"
+                                >
+                                    Password
+                                </Label>
+                                <Link
+                                    href="/forgot-password"
+                                    className="text-sm text-orange-400 hover:text-orange-300"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
+                            <div className="flex items-center bg-[#181F2F] border border-gray-700 rounded-xl px-3 py-2">
+                                <FaLock className="text-orange-400 mr-3" />
+                                <Input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    required
+                                    className="w-full bg-transparent border-0 text-white focus-visible:ring-0 focus-visible:ring-offset-0"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowPassword((prev) => !prev)
+                                    }
+                                    className="ml-3 text-gray-500 hover:text-orange-400"
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
+                                id="remember"
+                                checked={rememberMe}
+                                onCheckedChange={(checked) =>
+                                    setRememberMe(!!checked)
+                                }
+                                className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500 border-gray-600"
+                            />
+                            <label
+                                htmlFor="remember"
+                                className="text-sm font-medium text-gray-300 select-none cursor-pointer"
+                            >
+                                Remember me
+                            </label>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg py-3 rounded-xl shadow-lg transition-transform active:scale-[0.98]"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <div className="flex items-center justify-center">
+                                    <svg
+                                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        />
+                                    </svg>
+                                    Signing in...
+                                </div>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </Button>
+
+                        <div className="text-center">
+                            <span className="text-gray-400">
+                                Don&apos;t have an account?
+                            </span>{" "}
+                            <Link
+                                href="/signup"
+                                className="text-orange-400 font-medium hover:text-orange-300"
+                            >
+                                Sign up
+                            </Link>
+                        </div>
+
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-700"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-[#10182A] text-gray-400">
+                                    Or continue with
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <Button
+                                variant="outline"
+                                className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] hover:text-white"
+                                type="button"
+                                disabled={isLoading}
+                                onClick={handleGoogleLogin}
+                            >
+                                <FaGoogle className="mr-2 h-5 w-5 text-orange-400" />
+                                Google
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                className="w-full border-gray-700 bg-[#181F2F] text-white hover:bg-[#232B3E] hover:text-white"
+                                onClick={handleFacebookLogin}
+                                type="button"
+                                disabled={isLoading}
+                            >
+                                <FaFacebookF className="mr-2 h-5 w-5 text-orange-400" />
+                                Facebook
+                            </Button>
+                        </div>
+                    </form>
+                </motion.div>
+            </div>
+
+            {/* Session Expiry Modal */}
+            {showLogoutModal && (
+                <div className="fixed z-50 inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                    <div className="bg-[#181F2F] p-6 rounded-2xl shadow-2xl max-w-sm text-center border border-white/10 mx-4">
+                        <h2 className="text-lg font-bold text-white mb-2">
+                            You were logged out
+                        </h2>
+                        <p className="text-gray-300 mb-4">
+                            Due to inactivity, your session expired. Please log
+                            in again to continue.
+                        </p>
+                        <Button
+                            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 w-full text-white font-bold rounded-xl"
+                            onClick={() => setShowLogoutModal(false)}
+                        >
+                            Got it
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            <style jsx global>{`
+                @keyframes float {
+                    0% {
+                        transform: translateY(0px);
+                    }
+                    50% {
+                        transform: translateY(-20px);
+                    }
+                    100% {
+                        transform: translateY(0px);
+                    }
+                }
+                @keyframes pulse-slow {
+                    0% {
+                        opacity: 0.5;
+                    }
+                    50% {
+                        opacity: 0.7;
+                    }
+                    100% {
+                        opacity: 0.5;
+                    }
+                }
+                .animate-float {
+                    animation: float 8s ease-in-out infinite;
+                }
+                .animate-pulse-slow {
+                    animation: pulse-slow 6s ease-in-out infinite;
+                }
+            `}</style>
+        </>
+    );
+}
