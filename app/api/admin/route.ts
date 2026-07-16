@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// api/admin/route.ts
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -83,6 +84,29 @@ export async function GET(request: Request) {
                 return NextResponse.json(
                     { message: "Error fetching bids", error },
                     { status: 400 },
+                );
+            return NextResponse.json(data, { status: 200 });
+        }
+
+        // --- TARGET E: FETCH SINGLE USER PUBLIC INFO ---
+        if (target === "user_public") {
+            const userId = searchParams.get("id");
+            if (!userId)
+                return NextResponse.json(
+                    { message: "Missing ID" },
+                    { status: 400 },
+                );
+
+            const { data, error } = await supabase
+                .from("users")
+                .select("name, username")
+                .eq("user_id", userId)
+                .single();
+
+            if (error || !data)
+                return NextResponse.json(
+                    { message: "User not found" },
+                    { status: 404 },
                 );
             return NextResponse.json(data, { status: 200 });
         }

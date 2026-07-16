@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextResponse } from "next/server";
 
+// api/admin/newsletter/route.ts
 export async function POST(request: Request) {
     try {
         const { email } = await request.json();
