@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 import LoadingSpinner from "../../components/misc/LoadingSpinner";
 import { Auction } from "../../../lib/interfaces";
-import AuctionDetailsModal from "../../../app/components/AuctionDetailsModal";
+import AuctionDetailsModal from "@/app/components/auctions-cards/AuctionDetailsModal";
 // Import your client-side Supabase initializer (adjust this path to match your project)
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
