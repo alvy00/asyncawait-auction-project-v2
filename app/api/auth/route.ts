@@ -30,7 +30,10 @@ export async function POST(request: Request) {
             return NextResponse.json(
                 {
                     message: "Login successful!",
-                    token: data.session.access_token,
+                    session: {
+                        access_token: data.session.access_token,
+                        refresh_token: data.session.refresh_token,
+                    },
                     user: data.user,
                 },
                 { status: 200 },

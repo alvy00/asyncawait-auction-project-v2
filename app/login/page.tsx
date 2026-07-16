@@ -40,6 +40,10 @@ export default function LoginPage() {
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const handleSuccessfulLogin = () => {
+        router.replace("/");
+    };
+
     // 1. Unified Google OAuth Handler
     const handleGoogleLogin = async () => {
         const redirectTo = `${window.location.origin}/auth/callback`;
@@ -120,6 +124,38 @@ export default function LoginPage() {
         };
     }, [router, supabase.auth]);
 
+    // 4. Demo login
+    const handleDemoLogin = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch("/api/auth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "login",
+                    email: "demo@gmail.com",
+                    password: "al450681@",
+                }),
+            });
+
+            const result = await response.json();
+            if (!response.ok)
+                throw new Error(result.message || "Demo login failed.");
+
+            const { error: setSessionError } = await supabase.auth.setSession(
+                result.session,
+            );
+            if (setSessionError) throw setSessionError;
+
+            toast.success("Demo user logged in!");
+            handleSuccessfulLogin();
+        } catch (err: any) {
+            toast.error(err.message);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // Redirect if custom React context updates before layout mounted
     useEffect(() => {
         if (isReady && loggedIn && user) {
@@ -141,58 +177,35 @@ export default function LoginPage() {
         }
     }, [showLogoutModal]);
 
-    // 4. Serverless API Integrated Email/Password Authentication
+    // 5. Serverless API Integrated Email/Password Authentication
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLoading(true);
 
+        const formData = new FormData(e.currentTarget);
+        const email = formData.get("email")?.toString();
+        const password = formData.get("password")?.toString();
+
         try {
-            const formData = new FormData(e.currentTarget);
-            const email = formData.get("email")?.toString().trim() || "";
-            const password = formData.get("password")?.toString() || "";
-
-            if (!email || !password) {
-                toast.error("Please fill in all required fields.");
-                setIsLoading(false);
-                return;
-            }
-
-            // 🚀 Replaced client SDK execution with your serverless Route handler
             const response = await fetch("/api/auth", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    action: "login",
-                    email,
-                    password,
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "login", email, password }),
             });
 
             const result = await response.json();
-
-            if (!response.ok) {
+            if (!response.ok)
                 throw new Error(result.message || "Invalid credentials.");
-            }
 
-            // Sync backend tokens down to your client context layers
-            if (result.token) {
-                // Read from your api handler's refresh token structure if passed down,
-                // or let standard session recovery parse the new secure server cookie.
-                await supabase.auth.initialize();
-            }
+            const { error: setSessionError } = await supabase.auth.setSession(
+                result.session,
+            );
+            if (setSessionError) throw setSessionError;
 
-            toast.success(result.message || "Logged In!");
-
-            // Refresh routing layout and navigate to home base
-            router.refresh();
-            router.push("/");
+            toast.success("Logged In!");
+            handleSuccessfulLogin();
         } catch (err: any) {
-            console.error("Login failed:", err);
-            const message =
-                err?.message || "Login failed. Please verify your credentials.";
-            toast.error(message);
+            toast.error(err.message || "Login failed.");
         } finally {
             setIsLoading(false);
         }
@@ -308,6 +321,15 @@ export default function LoginPage() {
                             </label>
                         </div>
 
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleDemoLogin}
+                            disabled={isLoading}
+                            className="w-full border-orange-500/50 text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 py-3 rounded-xl font-bold transition-all"
+                        >
+                            Login with Demo Account
+                        </Button>
                         <Button
                             type="submit"
                             className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg py-3 rounded-xl shadow-lg transition-transform active:scale-[0.98]"
